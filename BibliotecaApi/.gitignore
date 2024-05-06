@@ -1,0 +1,39 @@
+# Ignorar arquivos de compilação gerados
+bin/
+obj/
+
+# Ignorar arquivos de dependências
+*.dll
+*.exe
+*.pdb
+*.dll.config
+
+# Ignorar arquivos de pacotes NuGet
+packages/
+*.nupkg
+*.paket.restore.log
+
+# Ignorar arquivos temporários do Visual Studio
+*.VisualState.xml
+*.user
+*.userosscache
+*.suo
+*.cache
+*.sln.docstates
+
+# Ignorar arquivos de compilação do MSBuild
+*.csproj.user
+*.csproj.vspscc
+.vs/
+
+# Ignorar arquivos temporários do macOS
+.DS_Store
+
+# Ignorar o banco de dados SQLite
+*.sqlite
+
+# Ignorar arquivos de migração do Entity Framework
+*.Designer.cs
+
+# Ignorar arquivos AssemblyInfo.cs
+**/AssemblyInfo.cs
