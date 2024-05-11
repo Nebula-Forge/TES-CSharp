@@ -13,6 +13,26 @@ app.MapGet("/", () => "API Biblioteca");
 // LIVROS
 // Cadastrar Livro
 // app.MapPost();
+// Cadastrar Livro
+app.MapPost("biblioteca/livro/cadastrar", ([FromBody] Livro livro, [FromServices] AppDataContext ctx) =>
+{
+    List<ValidationResult> erros = new List<ValidationResult>();
+    if (!Validator.TryValidateObject(livro, new ValidationContext(livro), erros, true))
+    {
+        return Results.BadRequest(erros);
+    }
+
+    Livro? livroExistente = ctx.Livros.FirstOrDefault(x => x.ISBN == livro.ISBN);
+    if (livroExistente != null)
+    {
+        return Results.BadRequest("Já existe um livro com o mesmo ISBN!");
+    }
+
+    ctx.Livros.Add(livro);
+    ctx.SaveChanges();
+    return Results.Created("", livro);
+});
+
 
 // Pesquisar Livro
 // app.MapGet();
