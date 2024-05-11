@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace API.Models
+namespace BiblotecaApi.Models
 {
     public class Livro
     {
@@ -20,5 +20,7 @@ namespace API.Models
 
         public int AnoPublicacao { get; set; }
 
+        public int? EmprestimoId { get; set; }
+        public Emprestimo? Emprestimo { get; set; }
     }
 }

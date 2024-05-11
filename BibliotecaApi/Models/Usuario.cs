@@ -1,12 +1,11 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace API.Models;
+namespace BiblotecaApi.Models;
 
 public class Usuario
 {
     public Usuario(string nome, string email, string telefone, string endereco)
     {
-        Id = Guid.NewGuid().ToString();
         Nome = nome;
         Email = email;
         Telefone = telefone;
@@ -14,8 +13,7 @@ public class Usuario
         CriadoEm = DateTime.Now;
     }
 
-    public string Id { get; set; }
-    public DateTime CriadoEm { get; set; }
+    public int Id { get; set; }
 
     [Required(ErrorMessage = "Campo obrigatório!")]
     public string Nome { get; set; }
@@ -29,4 +27,5 @@ public class Usuario
 
     [Required(ErrorMessage = "Campo obrigatório!")]
     public string Endereco { get; set; }
+    public DateTime CriadoEm { get; set; }
 }

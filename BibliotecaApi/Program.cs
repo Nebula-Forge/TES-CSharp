@@ -1,4 +1,4 @@
-﻿using API.Models;
+﻿using BiblotecaApi.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 
@@ -10,10 +10,24 @@ var app = builder.Build();
 
 app.MapGet("/", () => "API Biblioteca");
 
+// Funcionalidades
+
 // LIVROS
-// Cadastrar Livro
-// app.MapPost();
-// Cadastrar Livro
+// Cadastro de Livros: Permitir que o administrador da biblioteca cadastre novos livros, inserindo informações como título, autor, ISBN, etc.
+// Pesquisa de Livro: Permitir que os usuários pesquisem livros por título, autor, gênero, etc.
+// Reserva de Livros: Permitir que os usuários reservem livros que não estão disponíveis no momento, sendo notificados quando estiverem disponíveis.
+
+// USUARIOS
+// Cadastro de usuário: Permitir que novos usuários se cadastrem na biblioteca, fornecendo informações como nome, email, telefone, etc.
+// Busca de Usuário: Permitir buscar usuário por meio de nome, email, ou id.
+// Deletar Usuário: Permitir deletar usuário por meio de nome, email, ou id.
+// Alterar dados Usuário: Permitir alterar usuário por meio de nome, email, ou id.
+
+// EMPRESTIMOS
+// Empréstimo de Livros: Usuários cadastrados podem solicitar empréstimos de livros disponíveis na biblioteca.
+// Devolução de Livros: Usuários podem devolver os livros emprestados dentro do prazo estabelecido.
+// Renovação de empréstimo: Permitir que os usuários solicitem a renovação do prazo de empréstimo, se o livro não estiver reservado por outro usuário.
+
 app.MapPost("biblioteca/livro/cadastrar", ([FromBody] Livro livro, [FromServices] AppDataContext ctx) =>
 {
     List<ValidationResult> erros = new List<ValidationResult>();
@@ -30,20 +44,9 @@ app.MapPost("biblioteca/livro/cadastrar", ([FromBody] Livro livro, [FromServices
 
     ctx.Livros.Add(livro);
     ctx.SaveChanges();
-    return Results.Created("", livro);
+    ret    /// Results.Created("", livro);
 });
 
-
-// Pesquisar Livro
-// app.MapGet();
-
-// Listar Livros
-// app.MapGet();
-
-// Reservar Livro
-// app.MapPut();
-
-// USUÁRIOS
 // Cadastrar Usuário
 app.MapPost("biblioteca/usuario/cadastrar", ([FromBody] Usuario usuario, [FromServices] AppDataContext ctx) =>
 {
@@ -115,13 +118,3 @@ app.MapPut("biblioteca/usuario/alterar/{email}", ([FromRoute] string email, [Fro
     ctx.SaveChanges();
     return Results.Ok("Usuário alterado!");
 });
-
-// EMPRÉSTIMOS
-// Emprestar Livros
-// app.MapPut();
-
-// Devolver Livros
-// app.MapPut();
-
-// Renovar Empréstimo
-// app.MapPut();
