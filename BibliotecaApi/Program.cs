@@ -35,16 +35,14 @@ app.MapPost("biblioteca/livro/cadastrar", ([FromBody] Livro livro, [FromServices
     {
         return Results.BadRequest(erros);
     }
-
     Livro? livroExistente = ctx.Livros.FirstOrDefault(x => x.ISBN == livro.ISBN);
     if (livroExistente != null)
     {
         return Results.BadRequest("Já existe um livro com o mesmo ISBN!");
     }
-
     ctx.Livros.Add(livro);
     ctx.SaveChanges();
-    ret    /// Results.Created("", livro);
+    return Results.Created("", livro);
 });
 
 // Cadastrar Usuário
