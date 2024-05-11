@@ -28,6 +28,7 @@ app.MapGet("/", () => "API Biblioteca");
 // Devolução de Livros: Usuários podem devolver os livros emprestados dentro do prazo estabelecido.
 // Renovação de empréstimo: Permitir que os usuários solicitem a renovação do prazo de empréstimo, se o livro não estiver reservado por outro usuário.
 
+//Cadastrar Livros
 app.MapPost("biblioteca/livro/cadastrar", ([FromBody] Livro livro, [FromServices] AppDataContext ctx) =>
 {
     List<ValidationResult> erros = new List<ValidationResult>();
@@ -44,6 +45,17 @@ app.MapPost("biblioteca/livro/cadastrar", ([FromBody] Livro livro, [FromServices
     ctx.SaveChanges();
     return Results.Created("", livro);
 });
+
+//Listar Livros
+app.MapGet("biblioteca/livro/listar", ([FromServices] AppDataContext ctx) =>
+{
+    if (ctx.Livros.Any())
+    {
+        return Results.Ok(ctx.Livros.ToList());
+    }
+    return Results.NotFound("Não existem livros cadastrados.");
+});
+
 
 // Cadastrar Usuário
 app.MapPost("biblioteca/usuario/cadastrar", ([FromBody] Usuario usuario, [FromServices] AppDataContext ctx) =>
