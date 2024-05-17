@@ -1,10 +1,13 @@
 ﻿using BiblotecaApi.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<AppDataContext>();
+
+builder.Services.Configure<Microsoft.AspNetCore.Http.Json.JsonOptions>(options => options.SerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 
 var app = builder.Build();
 
@@ -91,7 +94,7 @@ app.MapGet("biblioteca/usuario/listar", ([FromServices] AppDataContext ctx) =>
 // Buscar Usuário
 app.MapGet("biblioteca/usuario/buscar/{email}", ([FromRoute] string email, [FromServices] AppDataContext ctx) =>
 {
-    Usuario? usuario = ctx.Usuarios.Find(email);
+    Usuario? usuario = ctx.Usuarios.FirstOrDefault(u => u.Email == email);
     if (usuario is null)
     {
         return Results.NotFound("Usuário não encontrado!");
@@ -102,7 +105,7 @@ app.MapGet("biblioteca/usuario/buscar/{email}", ([FromRoute] string email, [From
 // Deletar Usuário
 app.MapDelete("biblioteca/usuario/remover/{email}", ([FromRoute] string email, [FromServices] AppDataContext ctx) =>
 {
-    Usuario? usuario = ctx.Usuarios.Find(email);
+    Usuario? usuario = ctx.Usuarios.FirstOrDefault(u => u.Email == email);
     if (usuario is null)
     {
         return Results.NotFound("Usuário não encontrado!");
@@ -115,7 +118,7 @@ app.MapDelete("biblioteca/usuario/remover/{email}", ([FromRoute] string email, [
 // Alterar dados Usuário
 app.MapPut("biblioteca/usuario/alterar/{email}", ([FromRoute] string email, [FromBody] Usuario usuarioAlterado, [FromServices] AppDataContext ctx) =>
 {
-    Usuario? usuario = ctx.Usuarios.Find(email);
+    Usuario? usuario = ctx.Usuarios.FirstOrDefault(u => u.Email == email);
     if (usuario is null)
     {
         return Results.NotFound("Usuário não encontrado!");
@@ -130,17 +133,17 @@ app.MapPut("biblioteca/usuario/alterar/{email}", ([FromRoute] string email, [Fro
 });
 
 // Emprestar Livro
-app.MapPost("biblioteca/emprestimo/emprestar", ([FromBody] Emprestimo emprestimo, [FromServices] AppDataContext ctx) =>
+app.MapPost("biblioteca/emprestimo/emprestar/{email}", ([FromBody] Emprestimo emprestimoBody, [FromRoute] string email, [FromServices] AppDataContext ctx) =>
 {
-    Usuario? usuario = ctx.Usuarios.Find(emprestimo.Usuario?.Email);
+    Usuario? usuario = ctx.Usuarios.FirstOrDefault(u => u.Email == email);
     if (usuario is null)
     {
         return Results.NotFound("Usuário não encontrado!");
     }
     List<Livro> livros = new List<Livro>();
-    foreach (var livro in emprestimo.Livros)
+    foreach (var idLivro in emprestimoBody.LivroIds)
     {
-        Livro? livroEncontrado = ctx.Livros.Find(livro.Id);
+        Livro? livroEncontrado = ctx.Livros.Find(idLivro);
         if (livroEncontrado is null)
         {
             return Results.NotFound("Livro não encontrado!");
@@ -151,6 +154,7 @@ app.MapPost("biblioteca/emprestimo/emprestar", ([FromBody] Emprestimo emprestimo
         }
         livros.Add(livroEncontrado);
     }
+    Emprestimo emprestimo = new Emprestimo(usuario.Id, emprestimoBody.LivroIds);
     emprestimo.Livros = livros;
     ctx.Emprestimos.Add(emprestimo);
     ctx.SaveChanges();
@@ -160,21 +164,30 @@ app.MapPost("biblioteca/emprestimo/emprestar", ([FromBody] Emprestimo emprestimo
 // Devolver Livro
 app.MapPut("biblioteca/emprestimo/devolver/{id}", ([FromRoute] string id, [FromServices] AppDataContext ctx) =>
 {
-    Emprestimo? emprestimo = ctx.Emprestimos.Find(id);
+    Emprestimo? emprestimo = ctx.Emprestimos.Find(int.Parse(id));
+
     if (emprestimo is null)
     {
         return Results.NotFound("Empréstimo não encontrado!");
     }
+
     if (emprestimo.DataDevolucaoReal is not null)
     {
         return Results.BadRequest("Empréstimo já devolvido!");
     }
+
     emprestimo.DataDevolucaoReal = DateTime.Now;
     emprestimo.Status = "Devolvido";
-    foreach (var livro in emprestimo.Livros)
+
+    if (emprestimo.Livros is not null)
     {
-        livro.EmprestimoId = null;
+        foreach (var livro in emprestimo.Livros)
+        {
+            livro.EmprestimoId = null;
+        }
+
     }
+
     ctx.Emprestimos.Update(emprestimo);
     ctx.SaveChanges();
     return Results.Ok("Livro devolvido!");
@@ -183,24 +196,50 @@ app.MapPut("biblioteca/emprestimo/devolver/{id}", ([FromRoute] string id, [FromS
 // Renovar Empréstimo
 app.MapPut("biblioteca/emprestimo/renovar/{id}", ([FromRoute] string id, [FromServices] AppDataContext ctx) =>
 {
-    Emprestimo? emprestimo = ctx.Emprestimos.Find(id);
+    Emprestimo? emprestimo = ctx.Emprestimos.Find(int.Parse(id));
+
     if (emprestimo is null)
     {
         return Results.NotFound("Empréstimo não encontrado!");
     }
+
     if (emprestimo.Status == "Devolvido")
     {
         return Results.BadRequest("Empréstimo já devolvido!");
     }
+
     if (emprestimo.Status == "Renovado")
     {
         return Results.BadRequest("Empréstimo já renovado!");
     }
+
     emprestimo.DataDevolucaoPrevista = emprestimo.DataDevolucaoPrevista.AddDays(7);
     emprestimo.Status = "Renovado";
+
     ctx.Emprestimos.Update(emprestimo);
     ctx.SaveChanges();
     return Results.Ok("Empréstimo renovado!");
+});
+
+//Listar Emprestimos
+app.MapGet("biblioteca/emprestimo/listar", ([FromServices] AppDataContext ctx) =>
+{
+    if (ctx.Emprestimos.Any())
+    {
+        return Results.Ok(ctx.Emprestimos.ToList());
+    }
+    return Results.NotFound("Não existem empréstimos!");
+});
+
+//Buscar Emprestimo por Id
+app.MapGet("biblioteca/emprestimo/buscar/{id}", ([FromRoute] string id, [FromServices] AppDataContext ctx) =>
+{
+    Emprestimo? emprestimo = ctx.Emprestimos.Find(int.Parse(id));
+    if (emprestimo is null)
+    {
+        return Results.NotFound("Empréstimo não encontrado!");
+    }
+    return Results.Ok(emprestimo);
 });
 
 app.Run();
