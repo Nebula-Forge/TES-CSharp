@@ -3,17 +3,17 @@ namespace BiblotecaApi.Models;
 public class Emprestimo
 {
   public Emprestimo() { }
-  public Emprestimo(Usuario usuario, List<Livro> livros)
+  public Emprestimo(int usuarioId, List<int> livrosIds)
   {
-    Id = Guid.NewGuid().ToString();
-    Usuario = usuario;
-    Livros = livros;
+    UsuarioId = usuarioId;
+    LivroIds = livrosIds;
     DataEmprestimo = DateTime.Now;
     DataDevolucaoPrevista = DateTime.Now.AddDays(7);
     Status = "Em andamento";
   }
 
-  public string? Id { get; set; }
+  [Key]
+  public int? Id { get; set; }
   public DateTime DataEmprestimo { get; set; }
   public DateTime DataDevolucaoPrevista { get; set; }
   public DateTime? DataDevolucaoReal { get; set; }
@@ -21,7 +21,9 @@ public class Emprestimo
 
   [Required(ErrorMessage = "O usuário é obrigatório.")]
   public Usuario? Usuario { get; set; }
+  public int UsuarioId { get; set; }
 
   [Required(ErrorMessage = "Para o emprestimo é obrigatório no mínimo 01 livro.")]
   public virtual List<Livro>? Livros { get; set; }
+  public List<int>? LivroIds { get; set; }
 }
