@@ -128,3 +128,79 @@ app.MapPut("biblioteca/usuario/alterar/{email}", ([FromRoute] string email, [Fro
     ctx.SaveChanges();
     return Results.Ok("Usuário alterado!");
 });
+
+// Emprestar Livro
+app.MapPost("biblioteca/emprestimo/emprestar", ([FromBody] Emprestimo emprestimo, [FromServices] AppDataContext ctx) =>
+{
+    Usuario? usuario = ctx.Usuarios.Find(emprestimo.Usuario?.Email);
+    if (usuario is null)
+    {
+        return Results.NotFound("Usuário não encontrado!");
+    }
+    List<Livro> livros = new List<Livro>();
+    foreach (var livro in emprestimo.Livros)
+    {
+        Livro? livroEncontrado = ctx.Livros.Find(livro.Id);
+        if (livroEncontrado is null)
+        {
+            return Results.NotFound("Livro não encontrado!");
+        }
+        if (livroEncontrado.EmprestimoId is not null)
+        {
+            return Results.BadRequest("Livro já emprestado!");
+        }
+        livros.Add(livroEncontrado);
+    }
+    emprestimo.Livros = livros;
+    ctx.Emprestimos.Add(emprestimo);
+    ctx.SaveChanges();
+    return Results.Created("", emprestimo);
+});
+
+// Devolver Livro
+app.MapPut("biblioteca/emprestimo/devolver/{id}", ([FromRoute] string id, [FromServices] AppDataContext ctx) =>
+{
+    Emprestimo? emprestimo = ctx.Emprestimos.Find(id);
+    if (emprestimo is null)
+    {
+        return Results.NotFound("Empréstimo não encontrado!");
+    }
+    if (emprestimo.DataDevolucaoReal is not null)
+    {
+        return Results.BadRequest("Empréstimo já devolvido!");
+    }
+    emprestimo.DataDevolucaoReal = DateTime.Now;
+    emprestimo.Status = "Devolvido";
+    foreach (var livro in emprestimo.Livros)
+    {
+        livro.EmprestimoId = null;
+    }
+    ctx.Emprestimos.Update(emprestimo);
+    ctx.SaveChanges();
+    return Results.Ok("Livro devolvido!");
+});
+
+// Renovar Empréstimo
+app.MapPut("biblioteca/emprestimo/renovar/{id}", ([FromRoute] string id, [FromServices] AppDataContext ctx) =>
+{
+    Emprestimo? emprestimo = ctx.Emprestimos.Find(id);
+    if (emprestimo is null)
+    {
+        return Results.NotFound("Empréstimo não encontrado!");
+    }
+    if (emprestimo.Status == "Devolvido")
+    {
+        return Results.BadRequest("Empréstimo já devolvido!");
+    }
+    if (emprestimo.Status == "Renovado")
+    {
+        return Results.BadRequest("Empréstimo já renovado!");
+    }
+    emprestimo.DataDevolucaoPrevista = emprestimo.DataDevolucaoPrevista.AddDays(7);
+    emprestimo.Status = "Renovado";
+    ctx.Emprestimos.Update(emprestimo);
+    ctx.SaveChanges();
+    return Results.Ok("Empréstimo renovado!");
+});
+
+app.Run();
