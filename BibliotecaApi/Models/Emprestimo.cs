@@ -21,7 +21,6 @@ public class Emprestimo
 
   [Required(ErrorMessage = "O usuário é obrigatório.")]
   public Usuario? Usuario { get; set; }
-  public string? UsuarioId { get; set; }
 
   [Required(ErrorMessage = "Para o emprestimo é obrigatório no mínimo 01 livro.")]
   public virtual List<Livro>? Livros { get; set; }
