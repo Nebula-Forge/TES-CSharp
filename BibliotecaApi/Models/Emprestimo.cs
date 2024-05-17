@@ -13,14 +13,16 @@ public class Emprestimo
     Status = "Em andamento";
   }
 
-  public string? Id { get; private set; }
-  public DateTime DataEmprestimo { get; private set; }
-  public DateTime DataDevolucaoPrevista { get; private set; }
-  public DateTime? DataDevolucaoReal { get; private set; }
-  public string? Status { get; private set; }
+  public string? Id { get; set; }
+  public DateTime DataEmprestimo { get; set; }
+  public DateTime DataDevolucaoPrevista { get; set; }
+  public DateTime? DataDevolucaoReal { get; set; }
+  public string? Status { get; set; }
 
-  public Usuario? Usuario { get; private set; }
-  // public string? UsuarioId { get; private set; }
+  [Required(ErrorMessage = "O usuário é obrigatório.")]
+  public Usuario? Usuario { get; set; }
+  public string? UsuarioId { get; set; }
 
-  public virtual List<Livro>? Livros { get; private set; }
+  [Required(ErrorMessage = "Para o emprestimo é obrigatório no mínimo 01 livro.")]
+  public virtual List<Livro>? Livros { get; set; }
 }
