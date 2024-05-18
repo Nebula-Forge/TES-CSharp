@@ -59,6 +59,17 @@ app.MapGet("biblioteca/livro/listar", ([FromServices] AppDataContext ctx) =>
     return Results.NotFound("Não existem livros cadastrados.");
 });
 
+// Buscar Livro
+app.MapGet("biblioteca/livro/buscar/{titulo}", ([FromRoute] string titulo, [FromServices] AppDataContext ctx) =>
+{
+    Livro? livro = ctx.Livros.FirstOrDefault(l => l.Titulo.Contains(titulo, StringComparison.OrdinalIgnoreCase));
+    if (livro is null)
+    {
+        return Results.NotFound("Livro não encontrado!");
+    }
+    return Results.Ok(livro);
+});
+
 
 // Cadastrar Usuário
 app.MapPost("biblioteca/usuario/cadastrar", ([FromBody] Usuario usuario, [FromServices] AppDataContext ctx) =>
