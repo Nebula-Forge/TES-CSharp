@@ -9,6 +9,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<AppDataContext>();
 builder.Services.Configure<Microsoft.AspNetCore.Http.Json.JsonOptions>(options => options.SerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 builder.Services.AddEndpointsApiExplorer();
+
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Biblioteca API", Version = "v1" });
@@ -22,7 +23,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI(c =>
     {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "Biblioteca API v1");
-        c.RoutePrefix = string.Empty; // Configura a UI do Swagger na raiz (opcional)
+        c.RoutePrefix = string.Empty;
     });
 }
 
@@ -58,7 +59,9 @@ app.MapGet("biblioteca/livro/listar", ([FromServices] AppDataContext ctx) =>
 // Buscar Livro
 app.MapGet("biblioteca/livro/buscar/{titulo}", ([FromRoute] string titulo, [FromServices] AppDataContext ctx) =>
 {
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
     Livro? livro = ctx.Livros.FirstOrDefault(l => l.Titulo.Contains(titulo, StringComparison.OrdinalIgnoreCase));
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
     if (livro is null)
     {
         return Results.NotFound("Livro não encontrado!");
@@ -149,6 +152,7 @@ app.MapPost("biblioteca/emprestimo/emprestar/{email}", ([FromBody] Emprestimo em
     }
 
     List<Livro> livros = new List<Livro>();
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
     foreach (var idLivro in emprestimoBody.LivroIds)
     {
         Livro? livroEncontrado = ctx.Livros.Find(idLivro);
@@ -164,6 +168,7 @@ app.MapPost("biblioteca/emprestimo/emprestar/{email}", ([FromBody] Emprestimo em
 
         livros.Add(livroEncontrado);
     }
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
     Emprestimo emprestimo = new Emprestimo(usuario.Id, emprestimoBody.LivroIds);
     emprestimo.Livros = livros;
 
@@ -171,7 +176,9 @@ app.MapPost("biblioteca/emprestimo/emprestar/{email}", ([FromBody] Emprestimo em
     {
         Livro? livroEncontrado = ctx.Livros.Find(idLivro);
 
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
         livroEncontrado.EmprestimoId = emprestimoBody.Id;
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
         ctx.Livros.Update(livroEncontrado);
 
     }
@@ -255,6 +262,7 @@ app.MapGet("biblioteca/emprestimo/listar", ([FromServices] AppDataContext ctx) =
             emprestimo.Usuario = usuario;
 
             List<Livro> livros = new List<Livro>();
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
             foreach (var idLivro in emprestimo.LivroIds)
             {
                 Livro? livro = ctx.Livros.Find(idLivro);
@@ -263,6 +271,7 @@ app.MapGet("biblioteca/emprestimo/listar", ([FromServices] AppDataContext ctx) =
                     livros.Add(livro);
                 }
             }
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
             emprestimo.Livros = livros;
         }
         return Results.Ok(ctx.Emprestimos.ToList());
@@ -284,6 +293,7 @@ app.MapGet("biblioteca/emprestimo/buscar/{id}", ([FromRoute] string id, [FromSer
     emprestimo.Usuario = usuario;
 
     List<Livro> livros = new List<Livro>();
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
     foreach (var idLivro in emprestimo.LivroIds)
     {
         Livro? livro = ctx.Livros.Find(idLivro);
@@ -292,6 +302,7 @@ app.MapGet("biblioteca/emprestimo/buscar/{id}", ([FromRoute] string id, [FromSer
             livros.Add(livro);
         }
     }
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
     emprestimo.Livros = livros;
     return Results.Ok(emprestimo);
 });
