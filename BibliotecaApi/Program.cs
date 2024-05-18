@@ -1,35 +1,31 @@
 ﻿using BiblotecaApi.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.OpenApi.Models;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<AppDataContext>();
-
 builder.Services.Configure<Microsoft.AspNetCore.Http.Json.JsonOptions>(options => options.SerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Biblioteca API", Version = "v1" });
+});
 
 var app = builder.Build();
 
-app.MapGet("/", () => "API Biblioteca");
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Biblioteca API v1");
+        c.RoutePrefix = string.Empty; // Configura a UI do Swagger na raiz (opcional)
+    });
+}
 
-// Funcionalidades
-
-// LIVROS
-// Cadastro de Livros: Permitir que o administrador da biblioteca cadastre novos livros, inserindo informações como título, autor, ISBN, etc.
-// Pesquisa de Livro: Permitir que os usuários pesquisem livros por título, autor, gênero, etc.
-// Reserva de Livros: Permitir que os usuários reservem livros que não estão disponíveis no momento, sendo notificados quando estiverem disponíveis.
-
-// USUARIOS
-// Cadastro de usuário: Permitir que novos usuários se cadastrem na biblioteca, fornecendo informações como nome, email, telefone, etc.
-// Busca de Usuário: Permitir buscar usuário por meio de nome, email, ou id.
-// Deletar Usuário: Permitir deletar usuário por meio de nome, email, ou id.
-// Alterar dados Usuário: Permitir alterar usuário por meio de nome, email, ou id.
-
-// EMPRESTIMOS
-// Empréstimo de Livros: Usuários cadastrados podem solicitar empréstimos de livros disponíveis na biblioteca.
-// Devolução de Livros: Usuários podem devolver os livros emprestados dentro do prazo estabelecido.
-// Renovação de empréstimo: Permitir que os usuários solicitem a renovação do prazo de empréstimo, se o livro não estiver reservado por outro usuário.
 
 //Cadastrar Livros
 app.MapPost("biblioteca/livro/cadastrar", ([FromBody] Livro livro, [FromServices] AppDataContext ctx) =>
@@ -69,7 +65,6 @@ app.MapGet("biblioteca/livro/buscar/{titulo}", ([FromRoute] string titulo, [From
     }
     return Results.Ok(livro);
 });
-
 
 // Cadastrar Usuário
 app.MapPost("biblioteca/usuario/cadastrar", ([FromBody] Usuario usuario, [FromServices] AppDataContext ctx) =>
