@@ -32,6 +32,11 @@ const Header: React.FC<HeaderProps> = ({ variant }: HeaderProps) => {
 };
 
 const StylesHeader = styled.header`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 2;
   display: flex;
   justify-content: space-between;
   align-items: center;

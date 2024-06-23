@@ -4,23 +4,23 @@ import styled from "styled-components"
 interface ButtonProps {
   text: string;
   width: string;
-  height: string;
+  className?: string;
   onClick?: () => void;
-  variant: 'primary' | 'secondary';
+  variant: 'primary';
 }
 
-const Button : React.FC<ButtonProps>= ({text, width, height ,onClick, variant} : ButtonProps) => {
+const Button : React.FC<ButtonProps>= ({ text, width, className, onClick, variant } : ButtonProps) => {
   return (
     <>
-      { variant === 'primary' ? <PrimaryButton width={width} height={height} onClick={onClick}>{text}</PrimaryButton> : null}
+      { variant === 'primary' ? <PrimaryButton className={className} width={width} onClick={onClick}>{text}</PrimaryButton> : null}
     </>
   )
 }
 
-const PrimaryButton = styled.button<{width: string, height: string}>`
+const PrimaryButton = styled.button<{width: string}>`
   width: ${props => props.width};
-  height: ${props => props.height};
   background-color: #18BB55;
+  padding: 0.5rem 1.5rem;
   border: none;
   border-radius: 12px;
   color: #FFFFFF;
