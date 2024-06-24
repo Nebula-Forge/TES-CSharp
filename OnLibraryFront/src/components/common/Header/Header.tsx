@@ -10,7 +10,7 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ variant }: HeaderProps) => {
   return (
     <StylesHeader>
-      <h1>OnLibrary</h1>
+      <Link to="/" className='titulo'>OnLibrary</Link>
       {variant === 'showButton' && (
         <nav>
           <ul>
@@ -19,9 +19,8 @@ const Header: React.FC<HeaderProps> = ({ variant }: HeaderProps) => {
               <Button
                 text="Registrar"
                 width="252px"
-                height="57px"
-                onClick={() => console.log('Clicou')}
                 variant="primary"
+                link="/cadastro"
               />
             </li>
           </ul>
@@ -44,7 +43,7 @@ const StylesHeader = styled.header`
   padding: 20px 50px;
   background-color: #fff;
 
-  h1 {
+  .titulo {
     color: #000;
     font-family: Poppins;
     font-size: 2rem;
